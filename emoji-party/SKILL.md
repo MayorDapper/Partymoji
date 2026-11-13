@@ -93,7 +93,7 @@ FR(bar) = F0 + round(4*FPB*bar)
 - State what was not checked (you saw stills, not playback) and which lyric sections are estimated.
 - Offer fixes by scene or by lyric line; timeline markers are the cuts and the lyric JSON holds the timings.
 
-## 9. 3D toy-world mode ("a day in the life")
+## 9. V2: 3D toy-world mode ("a day in the life")
 Use when the user asks for 3D instead of Grease Pencil. Proven on "Mr Me" in Blender 5.3 (about 2,800 objects, 13 minutes to render). Everything in sections 0, 0b, 1 and 4 still applies; this replaces sections 2, 3, 5, 6 and 7.
 
 **Look.** A bright toy town: chunky bevelled houses, ball-top trees, puffy clouds, round hills, toy cars, glossy plastic materials (Principled, roughness ~0.22, a little emission so colours stay saturated). Original shapes only; take the feel of toy and platform-game worlds without copying any brand's bricks, characters or logos.
