@@ -1,6 +1,6 @@
 ---
 name: emoji-party
-description: Make a beat-synced emoji-world lyric music video in Blender Grease Pencil from any song in any genre: emoji characters with swag, a world and palette per scene, animated lyrics, full render.
+description: Make a beat-synced emoji-world lyric music video in Blender Grease Pencil from any song in any genre: emoji characters with swag, a world and palette per scene, animated lyrics, full render. Two modes: 2D Grease Pencil, or a 3D toy town where one emoji lives a day in the life.
 ---
 
 # Emoji Party (beat-synced emoji-world lyric video, Blender Grease Pencil)
@@ -92,3 +92,28 @@ FR(bar) = F0 + round(4*FPB*bar)
 - Say where the mp4 and .blend are (plain words plus a computer:// link), and send the contact sheet.
 - State what was not checked (you saw stills, not playback) and which lyric sections are estimated.
 - Offer fixes by scene or by lyric line; timeline markers are the cuts and the lyric JSON holds the timings.
+
+## 9. 3D toy-world mode ("a day in the life")
+Use when the user asks for 3D instead of Grease Pencil. Proven on "Mr Me" in Blender 5.3 (about 2,800 objects, 13 minutes to render). Everything in sections 0, 0b, 1 and 4 still applies; this replaces sections 2, 3, 5, 6 and 7.
+
+**Look.** A bright toy town: chunky bevelled houses, ball-top trees, puffy clouds, round hills, toy cars, glossy plastic materials (Principled, roughness ~0.22, a little emission so colours stay saturated). Original shapes only; take the feel of toy and platform-game worlds without copying any brand's bricks, characters or logos.
+
+**Story.** One hero emoji travels through ONE continuous town from morning to night. Each song section is a stop along a road where the hero meets a different emoji (the lyric decides who and what they do). Earlier characters return as a waving row in the chorus and as the full cast in the final chorus.
+
+**Layout.**
+- Stops sit along +X at a fixed spacing (24 units); stop i is at `X = i*24`. Road runs along X at y=-1.5, landmark building behind each stop at y~6.6, a signpost naming the place, background rows of houses/trees (y 8-12), hills (y 30-40) and clouds along the whole length.
+- `Hero` is an empty keyed on location X: it arrives at each stop on the section's first frame, holds, then travels during the last ~60 frames (BEZIER keys). In a cruise section it travels the whole time.
+- `Follow` is an empty whose X is driven from the hero (`hx+1.6`, TRANSFORMS variable). Camera pivot, fill/back lights, sun and moon balls, and ALL lyric words are parented to `Follow`, so they stay framed while the town scrolls past.
+- Camera: perspective 32 mm, about 13 units in front of the pivot, slight sway on the pivot, lens pulsing 3% on the beat.
+
+**Characters.** `emoji3d(mood)`: a UV sphere plus features placed on the front of the sphere by angle (`on(ax,az)`), built from small spheres, boxes and NURBS-curve tubes. Moods used: cool, joy, grin, anxious, bandage, huff, hush, scream, explode, nerd, angry, hot, star, zip, money, halo, party. Swag as child objects: tilted cap, beanie, bucket hat, crown, durag (cut spheres), curve-tube chain with a disc pendant and extruded letter, earrings, floating hands with ring and watch. Parent everything to one root empty and drive that root: bounce on PULSE, squash, sway, twist; face the NPC toward the hero with a base Z rotation.
+
+**Interactions (keep them simple and readable).** Hero and NPC face each other and dance on opposite beats; a hand from each reaches toward the other on OFFB (fist bump); props react (alarm clock shakes, seedling grows on the beat, clock hand spins, barbell lifts on HALF, diamond spins, package hops, rocket launches on a keyed frame with `0.006*max(0,frame-LF)^2`). For riding, key the hero root up and scale the vehicle in and out with a driver over that section's frames.
+
+**Time of day.** World background is a 3-stop vertical gradient; keyframe the ramp colours, the sun lamp's energy and colour, and the sun/moon ball heights at section starts (predawn, sunrise, day, golden hour, dusk, night, dawn).
+
+**Lyrics.** Extruded FONT objects work in 3D (no need to convert to strokes): white emissive face plus a dark offset copy behind as the outline. Same per-word pop and shake drivers as section 6. Measure word widths once in a scratch scene. Lines at the top of frame (z~5.1, wrap at ~11.6 units, size 0.72), ad-libs pink at the sides, hook word yellow low in the foreground. Put each section's words in `LYR_Sxx` collections. Lyric timings can be loaded from an earlier .blend's text block with `bpy.data.libraries.load`.
+
+**Render.** A frame costs ~2.3 s with the whole town loaded, regardless of resolution, because every driver is evaluated. In each per-section background process, DELETE (`bpy.data.batch_remove`) every object whose top-level parent is more than ~48 units outside that section's hero X range, plus all other sections' lyric collections; keep anything under `Follow` or `Hero` and the ground/road. That brings it to ~0.7 s/frame; run 6 processes at once, longest sections first, then assemble with the audio in a factory scene set to the Standard view transform. Turn EEVEE raytracing off; 12 samples is enough.
+
+**Checks.** Render one contact sheet of every mood on a plain background before building the town, then one contact sheet with a frame per section plus a travel frame. Watch for: the hero hidden behind a prop or vehicle, titles hidden behind the hero, lyric words overlapping while popping.
